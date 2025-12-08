@@ -65,11 +65,9 @@ export default function RoomPage() {
     return (
         <main className="min-h-screen p-4 bg-neo-bg text-neo-black flex flex-col items-center">
             <header className="w-full max-w-4xl flex justify-between items-center mb-8">
-                <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-                    <div className="bg-neo-black text-white p-2 rounded-lg">
-                        <Home className="w-6 h-6" />
-                    </div>
-                    <h1 className="text-2xl font-black">NOTESQR</h1>
+                <Link href="/" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                    <img src="/logo.png" alt="Q.E.D." className="w-12 h-12 object-contain border-2 border-neo-black rounded-lg bg-white" />
+                    <h1 className="text-2xl font-black tracking-tighter">Q.E.D.</h1>
                 </Link>
                 <div className="flex items-center gap-2">
                     <div className={`w-3 h-3 rounded-full ${isSignalingConnected ? 'bg-green-500' : 'bg-red-500'}`} />

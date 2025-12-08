@@ -23,7 +23,10 @@ export default function Home() {
       <div className="z-10 max-w-4xl w-full text-center space-y-12">
 
         {/* Hero Section */}
-        <div className="space-y-6">
+        <div className="space-y-6 flex flex-col items-center">
+          <div className="w-48 h-48 relative mb-4">
+            <img src="/logo.png" alt="Q.E.D. Logo" className="w-full h-full object-contain drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]" />
+          </div>
           <h1 className="text-6xl md:text-8xl font-black tracking-tighter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
             SEND <span className="text-neo-main">FILES</span>
             <br />
