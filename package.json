@@ -17,10 +17,12 @@
     "qrcode.react": "^4.2.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "react-tsparticles": "^2.12.2",
     "simple-peer": "^9.11.1",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "tsparticles-slim": "^2.12.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
