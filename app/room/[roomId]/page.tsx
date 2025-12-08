@@ -10,6 +10,7 @@ import { useFileTransfer } from '@/hooks/useFileTransfer';
 import { FileDropzone } from '@/components/FileDropzone';
 import { NeoCard } from '@/components/ui/NeoCard';
 import { NeoButton } from '@/components/ui/NeoButton';
+import { motion } from 'framer-motion';
 
 export default function RoomPage() {
     const params = useParams();
@@ -22,6 +23,13 @@ export default function RoomPage() {
     const [activeTab, setActiveTab] = useState<'files' | 'text'>('files');
     const [textMessage, setTextMessage] = useState('');
     const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
+    const [currentUrl, setCurrentUrl] = useState('');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setCurrentUrl(window.location.href);
+        }
+    }, []);
 
     useEffect(() => {
         if (isSignalingConnected && roomId) {
@@ -36,10 +44,11 @@ export default function RoomPage() {
     }, [incomingText]);
 
     const copyLink = () => {
-        const url = window.location.href;
-        navigator.clipboard.writeText(url);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        if (currentUrl) {
+            navigator.clipboard.writeText(currentUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
     };
 
     const handleFilesSelected = async (selectedFiles: File[]) => {
@@ -63,13 +72,17 @@ export default function RoomPage() {
     };
 
     return (
-        <main className="min-h-screen p-4 bg-neo-bg text-neo-black flex flex-col items-center">
+        <motion.main
+            className="min-h-screen p-4 bg-transparent text-neo-black flex flex-col items-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+        >
             <header className="w-full max-w-4xl flex justify-between items-center mb-8">
                 <Link href="/" className="flex items-center gap-4 hover:opacity-80 transition-opacity">
                     <img src="/logo.png" alt="Q.E.D." className="w-12 h-12 object-contain border-2 border-neo-black rounded-lg bg-white" />
-                    <h1 className="text-2xl font-black tracking-tighter">Q.E.D.</h1>
                 </Link>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 bg-white px-3 py-1 rounded-full border-2 border-neo-black shadow-neo-sm">
                     <div className={`w-3 h-3 rounded-full ${isSignalingConnected ? 'bg-green-500' : 'bg-red-500'}`} />
                     <span className="font-bold text-sm">{isSignalingConnected ? 'Server Connected' : 'Connecting...'}</span>
                 </div>
@@ -77,7 +90,12 @@ export default function RoomPage() {
 
             <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Left Column: Connection Info */}
-                <div className="space-y-6">
+                <motion.div
+                    className="space-y-6"
+                    initial={{ x: -50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                >
                     <NeoCard className="space-y-6">
                         <div className="text-center space-y-2">
                             <h2 className="text-2xl font-black">SCAN TO CONNECT</h2>
@@ -85,12 +103,12 @@ export default function RoomPage() {
                         </div>
 
                         <div className="flex justify-center p-4 bg-white border-2 border-neo-black rounded-xl">
-                            <QRCodeSVG value={typeof window !== 'undefined' ? window.location.href : ''} size={200} />
+                            {currentUrl && <QRCodeSVG value={currentUrl} size={200} />}
                         </div>
 
                         <div className="flex items-center gap-2">
                             <div className="flex-1 h-12 bg-white border-2 border-neo-black flex items-center px-3 font-mono text-sm overflow-hidden whitespace-nowrap">
-                                {typeof window !== 'undefined' ? window.location.href : 'Loading...'}
+                                {currentUrl || 'Loading...'}
                             </div>
                             <NeoButton onClick={copyLink} size="sm" className="h-12 w-12 flex items-center justify-center px-0">
                                 {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
@@ -103,35 +121,51 @@ export default function RoomPage() {
                             <Monitor className="w-5 h-5" /> Status
                         </h3>
                         <div className="space-y-2">
-                            <div className="flex justify-between font-bold">
+                            <div className="flex justify-between items-center font-bold">
                                 <span>P2P Connection:</span>
-                                <span className={`
-                  ${connectionState === 'connected' ? 'text-green-600' :
-                                        connectionState === 'connecting' ? 'text-yellow-600' :
-                                            connectionState === 'failed' ? 'text-red-600' : 'text-gray-600'}
-                `}>
-                                    {connectionState.toUpperCase()}
-                                </span>
+                                <div className={`flex items-center gap-2 px-3 py-1 rounded-full border-2 border-neo-black ${connectionState === 'connected' ? 'bg-green-100 text-green-700' :
+                                        connectionState === 'failed' ? 'bg-red-100 text-red-700' :
+                                            'bg-yellow-100 text-yellow-700'
+                                    }`}>
+                                    <div className={`w-2 h-2 rounded-full ${connectionState === 'connected' ? 'bg-green-600' :
+                                            connectionState === 'failed' ? 'bg-red-600' :
+                                                'bg-yellow-600'
+                                        }`} />
+                                    <span>
+                                        {connectionState === 'connected' ? 'ONLINE' :
+                                            connectionState === 'failed' ? 'OFFLINE' :
+                                                connectionState.toUpperCase()}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </NeoCard>
-                </div>
+                </motion.div>
 
                 {/* Right Column: Transfer Area */}
-                <div className="space-y-6">
+                <motion.div
+                    className="space-y-6"
+                    initial={{ x: 50, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                >
                     <NeoCard className="h-full min-h-[500px] flex flex-col relative overflow-hidden p-0">
                         {/* Tabs */}
                         <div className="flex border-b-2 border-neo-black">
                             <button
                                 onClick={() => setActiveTab('files')}
-                                className={`flex-1 p-4 font-black flex items-center justify-center gap-2 transition-colors ${activeTab === 'files' ? 'bg-neo-yellow' : 'bg-white hover:bg-gray-50'
+                                className={`flex-1 p-4 font-black flex items-center justify-center gap-2 transition-all duration-200 ${activeTab === 'files'
+                                        ? 'bg-neo-blue text-white'
+                                        : 'bg-white hover:bg-yellow-100'
                                     }`}
                             >
                                 <FileText className="w-5 h-5" /> FILES
                             </button>
                             <button
                                 onClick={() => setActiveTab('text')}
-                                className={`flex-1 p-4 font-black flex items-center justify-center gap-2 transition-colors border-l-2 border-neo-black ${activeTab === 'text' ? 'bg-neo-yellow' : 'bg-white hover:bg-gray-50'
+                                className={`flex-1 p-4 font-black flex items-center justify-center gap-2 transition-all duration-200 border-l-2 border-neo-black ${activeTab === 'text'
+                                        ? 'bg-neo-blue text-white'
+                                        : 'bg-white hover:bg-yellow-100'
                                     }`}
                             >
                                 <MessageSquare className="w-5 h-5" /> TEXT
@@ -200,8 +234,8 @@ export default function RoomPage() {
                             )}
                         </div>
                     </NeoCard>
-                </div>
+                </motion.div>
             </div>
-        </main>
+        </motion.main>
     );
 }

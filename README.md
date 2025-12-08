@@ -1,63 +1,47 @@
-# Q.E.D.
-> *Quod Erat Demonstrandum* — "Which was to be demonstrated."
+# Q.E.D. (Quod Erat Demonstrandum)
 
-**Q.E.D.** is a minimalist, peer-to-peer file transfer tool designed for the intellectual web. It adheres to the philosophy of doing one thing perfectly: moving data from Point A to Point B without intermediaries, surveillance, or friction.
+**The file has been sent.**
 
-When the file arrives, the proof is complete. **Q.E.D.**
+Q.E.D. is a secure, serverless, peer-to-peer file sharing application designed with a bold Neobrutalist aesthetic. It allows you to transfer files of any size directly between devices without ever storing them on a server.
 
-![Q.E.D. Interface](https://via.placeholder.com/800x400?text=Q.E.D.+Interface)
+## Philosophy
 
-## The Philosophy
-*   **Axiomatic Privacy**: No servers store your files. Data flows directly between peers via WebRTC.
-*   **Universal Logic**: Works on any device with a browser. No installation required.
-*   **Infinite Set**: No file size limits. If your device can hold it, you can send it.
-*   **Neobrutalist Aesthetic**: Raw, bold, and unpretentious. Form follows function.
+*   **Direct**: Browser-to-browser via WebRTC.
+*   **Secure**: End-to-end encrypted.
+*   **Private**: No logs, no tracking, no middleman.
+*   **Limitless**: No file size caps (limited only by your RAM/Browser).
 
 ## Features
-*   **Instant P2P Connection**: Uses a lightweight signaling server only for the handshake.
-*   **Ephemeral Rooms**: Unique, cryptographically random room IDs (`nanoid`).
-*   **Cross-Device**: Seamlessly connects Mobile to Desktop via QR Code.
-*   **Text & Clipboard**: Share code snippets, URLs, or secrets instantly.
-*   **Visual Feedback**: Real-time progress bars and connection status.
+
+*   **Neobrutalist Design**: High contrast, bold typography, hard shadows.
+*   **Instant Rooms**: Generate a unique link and QR code instantly.
+*   **Cross-Device**: Seamlessly share between Desktop and Mobile.
+*   **Text Sharing**: Send secure text messages alongside files.
+*   **Real-time Progress**: Visual feedback for all transfers.
 
 ## Tech Stack
-*   **Framework**: Next.js 14 (App Router)
-*   **Language**: TypeScript
-*   **Styling**: Tailwind CSS (Neobrutalist Theme)
-*   **Protocol**: WebRTC (`simple-peer`)
-*   **Signaling**: Custom Node.js Server (`socket.io`)
+
+*   **Frontend**: Next.js 14 (App Router), Tailwind CSS
+*   **Signaling**: Custom Node.js Server + Socket.io
+*   **P2P Logic**: Simple-Peer (WebRTC)
+*   **Styling**: Lucide React (Icons), Custom Neobrutalist Components
 
 ## Getting Started
 
-### Prerequisites
-*   Node.js 18+
-*   npm
-
-### Installation
-
-1.  **Clone the repository**
-    ```bash
-    git clone https://github.com/yourusername/qed.git
-    cd qed
-    ```
-
-2.  **Install dependencies**
+1.  **Install Dependencies**:
     ```bash
     npm install
     ```
 
-3.  **Run the development server**
+2.  **Run Development Server**:
     ```bash
     npm run dev
     ```
+    *Note: This runs a custom server (`server.js`) to handle both Next.js and Socket.io.*
 
-4.  **Open the application**
-    Visit `http://localhost:3000`.
+3.  **Open in Browser**:
+    Visit `http://localhost:3000`
 
 ## Deployment
-Q.E.D. requires a persistent Node.js server for WebRTC signaling.
-*   **Recommended**: Render, Railway, or Fly.io.
-*   **Not Supported**: Vercel/Netlify (Serverless functions cannot maintain Socket.io connections).
 
-## License
-MIT. Free as in logic.
+See [deployment.md](deployment.md) for instructions on deploying to platforms like Railway, Render, or Google Cloud Run. Note that Vercel serverless functions do not support the long-running WebSocket connections required for the signaling server.

@@ -6,6 +6,8 @@ import { NeoButton } from '@/components/ui/NeoButton';
 import { NeoCard } from '@/components/ui/NeoCard';
 import { ArrowRight, Share2, Shield, Zap } from 'lucide-react';
 
+import { motion } from 'framer-motion';
+
 export default function Home() {
   const router = useRouter();
 
@@ -15,7 +17,12 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-neo-bg text-neo-black relative overflow-hidden">
+    <motion.main
+      className="min-h-screen flex flex-col items-center justify-center p-4 bg-transparent text-neo-black relative overflow-hidden"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* Decorative Background Elements */}
       <div className="absolute top-10 left-10 w-32 h-32 bg-neo-main rounded-full blur-3xl opacity-50 pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-48 h-48 bg-neo-blue rounded-full blur-3xl opacity-50 pointer-events-none" />
@@ -23,7 +30,12 @@ export default function Home() {
       <div className="z-10 max-w-4xl w-full text-center space-y-12">
 
         {/* Hero Section */}
-        <div className="space-y-6 flex flex-col items-center">
+        <motion.div
+          className="space-y-6 flex flex-col items-center"
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2, type: 'spring' }}
+        >
           <div className="w-48 h-48 relative mb-4">
             <img src="/logo.png" alt="Q.E.D. Logo" className="w-full h-full object-contain drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]" />
           </div>
@@ -37,10 +49,14 @@ export default function Home() {
             <br />
             Just you and the receiver.
           </p>
-        </div>
+        </motion.div>
 
         {/* CTA */}
-        <div className="flex justify-center">
+        <motion.div
+          className="flex justify-center"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <NeoButton
             size="lg"
             onClick={startSharing}
@@ -48,39 +64,36 @@ export default function Home() {
           >
             Start Sharing <ArrowRight className="w-8 h-8" />
           </NeoButton>
-        </div>
+        </motion.div>
 
         {/* Features Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
-          <NeoCard className="flex flex-col items-center text-center space-y-4 hover:-translate-y-2 transition-transform">
-            <div className="p-4 bg-neo-accent rounded-full border-2 border-neo-black shadow-neo-sm">
-              <Shield className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-xl font-black">Private & Secure</h3>
-            <p className="font-medium">End-to-end encrypted via WebRTC. We never see your files.</p>
-          </NeoCard>
-
-          <NeoCard className="flex flex-col items-center text-center space-y-4 hover:-translate-y-2 transition-transform">
-            <div className="p-4 bg-neo-blue rounded-full border-2 border-neo-black shadow-neo-sm">
-              <Zap className="w-8 h-8 text-white" />
-            </div>
-            <h3 className="text-xl font-black">Blazing Fast</h3>
-            <p className="font-medium">Direct P2P transfer. Speed limited only by your connection.</p>
-          </NeoCard>
-
-          <NeoCard className="flex flex-col items-center text-center space-y-4 hover:-translate-y-2 transition-transform">
-            <div className="p-4 bg-neo-main rounded-full border-2 border-neo-black shadow-neo-sm">
-              <Share2 className="w-8 h-8 text-black" />
-            </div>
-            <h3 className="text-xl font-black">No Limits</h3>
-            <p className="font-medium">Share files of any size. No arbitrary caps or bandwidth limits.</p>
-          </NeoCard>
+          {[
+            { icon: Shield, title: "Private & Secure", desc: "End-to-end encrypted via WebRTC. We never see your files.", color: "bg-neo-accent" },
+            { icon: Zap, title: "Blazing Fast", desc: "Direct P2P transfer. Speed limited only by your connection.", color: "bg-neo-blue" },
+            { icon: Share2, title: "No Limits", desc: "Share files of any size. No arbitrary caps or bandwidth limits.", color: "bg-neo-main" }
+          ].map((feature, idx) => (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + (idx * 0.1) }}
+            >
+              <NeoCard className="flex flex-col items-center text-center space-y-4 hover:-translate-y-2 transition-transform h-full">
+                <div className={`p-4 ${feature.color} rounded-full border-2 border-neo-black shadow-neo-sm`}>
+                  <feature.icon className="w-8 h-8 text-white" />
+                </div>
+                <h3 className="text-xl font-black">{feature.title}</h3>
+                <p className="font-medium">{feature.desc}</p>
+              </NeoCard>
+            </motion.div>
+          ))}
         </div>
       </div>
 
       <footer className="absolute bottom-4 text-sm font-bold opacity-50">
         Built with Next.js & WebRTC
       </footer>
-    </main>
+    </motion.main>
   );
 }
