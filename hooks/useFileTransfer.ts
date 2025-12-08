@@ -175,10 +175,37 @@ export const useFileTransfer = (roomId: string) => {
                 mimeType: file.type
             };
 
-            try {
+            peerRef.current.send(JSON.stringify({ type: 'meta', meta }));
+
+            const chunkSize = 16 * 1024;
+            const reader = new FileReader();
+            let offset = 0;
+
+            reader.onerror = (err) => reject(err);
+
+            reader.onload = (e) => {
+                const data = e.target?.result as ArrayBuffer;
+                if (data) {
+                    try {
+                        peerRef.current?.send(data);
+                        offset += data.byteLength;
+                        setProgress((offset / file.size) * 100);
+
+                        if (offset < file.size) {
+                            readSlice(offset);
+                        } else {
+                            resolve();
+                        }
+                    } catch (err) {
+                        reject(err);
+                    }
+                }
             };
-            reader.readAsArrayBuffer(slice);
-        };
+
+            const readSlice = (o: number) => {
+                const slice = file.slice(o, o + chunkSize);
+                reader.readAsArrayBuffer(slice);
+            };
 
         readSlice(0);
     });
