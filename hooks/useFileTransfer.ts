@@ -22,6 +22,7 @@ export const useFileTransfer = (roomId: string) => {
     const [connectionState, setConnectionState] = useState<'disconnected' | 'connecting' | 'connected' | 'failed'>('disconnected');
     const [progress, setProgress] = useState(0);
     const [incomingFile, setIncomingFile] = useState<FileMeta | null>(null);
+    const [incomingText, setIncomingText] = useState<string | null>(null);
 
     const peerRef = useRef<PeerInstance | null>(null);
     const incomingFileRef = useRef<IncomingFile | null>(null);
@@ -110,9 +111,10 @@ export const useFileTransfer = (roomId: string) => {
     }, [socket, roomId]);
 
     const handleData = (data: any) => {
-        if (data.toString().includes('{"type":"meta"')) {
+        const str = data.toString();
+        if (str.includes('{"type":"meta"')) {
             try {
-                const payload = JSON.parse(data.toString());
+                const payload = JSON.parse(str);
                 const meta = payload.meta;
                 console.log('Receiving file:', meta);
                 incomingFileRef.current = {
@@ -124,6 +126,13 @@ export const useFileTransfer = (roomId: string) => {
                 setProgress(0);
             } catch (e) {
                 console.error('Error parsing meta:', e);
+            }
+        } else if (str.includes('{"type":"text"')) {
+            try {
+                const payload = JSON.parse(str);
+                setIncomingText(payload.content);
+            } catch (e) {
+                console.error('Error parsing text:', e);
             }
         } else if (incomingFileRef.current) {
             const chunk = data as ArrayBuffer;
@@ -191,5 +200,10 @@ export const useFileTransfer = (roomId: string) => {
         readSlice(0);
     };
 
-    return { peer, connectionState, sendFile, progress, incomingFile };
+    const sendText = (text: string) => {
+        if (!peerRef.current || connectionState !== 'connected') return;
+        peerRef.current.send(JSON.stringify({ type: 'text', content: text }));
+    };
+
+    return { peer, connectionState, sendFile, sendText, progress, incomingFile, incomingText };
 };
