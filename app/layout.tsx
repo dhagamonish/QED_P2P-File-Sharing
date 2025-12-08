@@ -4,6 +4,7 @@ import "./globals.css";
 import { SignalingProvider } from "@/lib/webrtc/SignalingContext";
 import { CustomCursor } from "@/components/ui/CustomCursor";
 import { AnimatedBackground } from "@/components/ui/AnimatedBackground";
+import { Footer } from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Q.E.D.',
+  title: 'Q.E.D - File Sharing',
   description: 'Quod Erat Demonstrandum. Secure, direct, serverless file transfer.',
 };
 
@@ -34,6 +35,7 @@ export default function RootLayout({
           <CustomCursor />
           <AnimatedBackground />
           {children}
+          <Footer />
         </SignalingProvider>
       </body>
     </html>
