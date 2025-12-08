@@ -16,7 +16,7 @@ const NeoCard = forwardRef<HTMLDivElement, NeoCardProps>(
             <div
                 ref={ref}
                 className={cn(
-                    'bg-neo-white border-2 border-neo-black p-6',
+                    'bg-neo-white border-2 border-neo-black p-6 md:p-8', // Consistent padding, larger on desktop
                     variant === 'default' && 'shadow-neo',
                     className
                 )}

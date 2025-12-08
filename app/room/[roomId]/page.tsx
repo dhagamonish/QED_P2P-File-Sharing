@@ -91,7 +91,7 @@ export default function RoomPage() {
             <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Left Column: Connection Info */}
                 <motion.div
-                    className="space-y-6"
+                    className="space-y-8"
                     initial={{ x: -50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}

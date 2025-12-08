@@ -31,7 +31,7 @@ export default function Home() {
 
         {/* Hero Section */}
         <motion.div
-          className="space-y-6 flex flex-col items-center"
+          className="space-y-8 flex flex-col items-center" // Increased spacing for better separation
           initial={{ scale: 0.9 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.2, type: 'spring' }}
@@ -90,10 +90,6 @@ export default function Home() {
           ))}
         </div>
       </div>
-
-      <footer className="absolute bottom-4 text-sm font-bold opacity-50">
-        Built with Next.js & WebRTC
-      </footer>
     </motion.main>
   );
 }

@@ -21,7 +21,7 @@ const NeoButton = forwardRef<HTMLButtonElement, NeoButtonProps>(
     };
 
     const sizes = {
-      sm: 'px-3 py-1.5 text-sm',
+      sm: 'px-4 py-2 text-sm', // Increased from px-3 py-1.5 for better touch target
       md: 'px-6 py-3 text-base',
       lg: 'px-8 py-4 text-lg font-bold',
     };
