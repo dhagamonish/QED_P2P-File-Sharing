@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Q.E.D.
+> *Quod Erat Demonstrandum* — "Which was to be demonstrated."
+
+**Q.E.D.** is a minimalist, peer-to-peer file transfer tool designed for the intellectual web. It adheres to the philosophy of doing one thing perfectly: moving data from Point A to Point B without intermediaries, surveillance, or friction.
+
+When the file arrives, the proof is complete. **Q.E.D.**
+
+![Q.E.D. Interface](https://via.placeholder.com/800x400?text=Q.E.D.+Interface)
+
+## The Philosophy
+*   **Axiomatic Privacy**: No servers store your files. Data flows directly between peers via WebRTC.
+*   **Universal Logic**: Works on any device with a browser. No installation required.
+*   **Infinite Set**: No file size limits. If your device can hold it, you can send it.
+*   **Neobrutalist Aesthetic**: Raw, bold, and unpretentious. Form follows function.
+
+## Features
+*   **Instant P2P Connection**: Uses a lightweight signaling server only for the handshake.
+*   **Ephemeral Rooms**: Unique, cryptographically random room IDs (`nanoid`).
+*   **Cross-Device**: Seamlessly connects Mobile to Desktop via QR Code.
+*   **Text & Clipboard**: Share code snippets, URLs, or secrets instantly.
+*   **Visual Feedback**: Real-time progress bars and connection status.
+
+## Tech Stack
+*   **Framework**: Next.js 14 (App Router)
+*   **Language**: TypeScript
+*   **Styling**: Tailwind CSS (Neobrutalist Theme)
+*   **Protocol**: WebRTC (`simple-peer`)
+*   **Signaling**: Custom Node.js Server (`socket.io`)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+*   Node.js 18+
+*   npm
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### Installation
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/yourusername/qed.git
+    cd qed
+    ```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3.  **Run the development server**
+    ```bash
+    npm run dev
+    ```
 
-## Learn More
+4.  **Open the application**
+    Visit `http://localhost:3000`.
 
-To learn more about Next.js, take a look at the following resources:
+## Deployment
+Q.E.D. requires a persistent Node.js server for WebRTC signaling.
+*   **Recommended**: Render, Railway, or Fly.io.
+*   **Not Supported**: Vercel/Netlify (Serverless functions cannot maintain Socket.io connections).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+MIT. Free as in logic.

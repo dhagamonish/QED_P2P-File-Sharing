@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NotesQR Clone",
-  description: "P2P File Sharing",
+  title: "Q.E.D.",
+  description: "Quod Erat Demonstrandum. Secure, direct, serverless file transfer.",
 };
 
 export default function RootLayout({
