@@ -162,48 +162,32 @@ export const useFileTransfer = (roomId: string) => {
         URL.revokeObjectURL(url);
     };
 
-    const sendFile = async (file: File) => {
-        if (!peerRef.current || connectionState !== 'connected') return;
+    const sendFile = (file: File): Promise<void> => {
+        return new Promise((resolve, reject) => {
+            if (!peerRef.current || connectionState !== 'connected') {
+                reject(new Error("No connection"));
+                return;
+            }
 
-        const meta: FileMeta = {
-            name: file.name,
-            size: file.size,
-            mimeType: file.type
-        };
-        peerRef.current.send(JSON.stringify({ type: 'meta', meta }));
+            const meta: FileMeta = {
+                name: file.name,
+                size: file.size,
+                mimeType: file.type
+            };
 
-        const chunkSize = 16 * 1024;
-        let offset = 0;
-
-        const readSlice = (o: number) => {
-            const slice = file.slice(o, o + chunkSize);
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                if (e.target?.result && peerRef.current) {
-                    peerRef.current.send(e.target.result as ArrayBuffer);
-                    offset += chunkSize;
-
-                    const percent = Math.min((offset / file.size) * 100, 100);
-                    setProgress(percent);
-
-                    if (offset < file.size) {
-                        setTimeout(() => readSlice(offset), 0);
-                    } else {
-                        console.log('File sent');
-                        setProgress(0);
-                    }
-                }
+            try {
             };
             reader.readAsArrayBuffer(slice);
         };
 
         readSlice(0);
-    };
+    });
+};
 
-    const sendText = (text: string) => {
-        if (!peerRef.current || connectionState !== 'connected') return;
-        peerRef.current.send(JSON.stringify({ type: 'text', content: text }));
-    };
+const sendText = (text: string) => {
+    if (!peerRef.current || connectionState !== 'connected') return;
+    peerRef.current.send(JSON.stringify({ type: 'text', content: text }));
+};
 
-    return { peer, connectionState, sendFile, sendText, progress, incomingFile, incomingText };
+return { peer, connectionState, sendFile, sendText, progress, incomingFile, incomingText };
 };

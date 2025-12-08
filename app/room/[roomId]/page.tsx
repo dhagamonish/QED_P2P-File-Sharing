@@ -26,6 +26,10 @@ export default function RoomPage() {
     const [receivedMessages, setReceivedMessages] = useState<string[]>([]);
     const [currentUrl, setCurrentUrl] = useState('');
 
+    // Multi-file state
+    const [transferQueue, setTransferQueue] = useState<{ file: File, status: 'pending' | 'sending' | 'completed' | 'error' }[]>([]);
+    const [queueStatus, setQueueStatus] = useState<'idle' | 'sending' | 'completed'>('idle');
+
     useEffect(() => {
         if (typeof window !== 'undefined') {
             setCurrentUrl(window.location.href);
@@ -52,16 +56,46 @@ export default function RoomPage() {
         }
     };
 
-    const handleFilesSelected = async (selectedFiles: File[]) => {
-        setFiles(selectedFiles);
-        if (connectionState === 'connected') {
-            setSending(true);
-            for (const file of selectedFiles) {
+    const handleFilesSelected = (selectedFiles: File[]) => {
+        // Just add to staging, don't send yet
+        setFiles(prev => [...prev, ...selectedFiles]);
+    };
+
+    const handleStartTransfer = async () => {
+        if (files.length === 0 || connectionState !== 'connected') return;
+
+        setSending(true);
+        setQueueStatus('sending');
+
+        // Initialize queue
+        const initialQueue = files.map(f => ({ file: f, status: 'pending' as const }));
+        setTransferQueue(initialQueue);
+
+        // Process queue sequentially
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+
+            // Update status to sending
+            setTransferQueue(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'sending' } : item));
+
+            try {
                 await sendFile(file);
+                // Update status to completed
+                setTransferQueue(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'completed' } : item));
+            } catch (error) {
+                console.error("Error sending file:", file.name, error);
+                setTransferQueue(prev => prev.map((item, idx) => idx === i ? { ...item, status: 'error' } : item));
             }
-            setSending(false);
-            setFiles([]);
         }
+
+        setSending(false);
+        setQueueStatus('completed');
+    };
+
+    const handleReset = () => {
+        setFiles([]);
+        setTransferQueue([]);
+        setQueueStatus('idle');
     };
 
     const handleSendText = () => {
@@ -175,33 +209,134 @@ export default function RoomPage() {
                             </button>
                         </div>
 
-                        <div className="p-6 flex-1 flex flex-col">
+                        <div className="p-6 flex-1 flex flex-col relative">
                             {connectionState === 'connected' ? (
                                 <>
                                     {activeTab === 'files' ? (
-                                        <div className="flex-1 flex flex-col">
-                                            {!sending && !incomingFile && <FileDropzone onFilesSelected={handleFilesSelected} />}
-
-                                            {sending && (
-                                                <div className="flex-1 flex flex-col items-center justify-center space-y-4">
-                                                    <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden border-2 border-neo-black">
-                                                        <div className="h-full bg-neo-yellow transition-all duration-100" style={{ width: `${progress}%` }} />
+                                        <div className="flex-1 flex flex-col h-full overflow-hidden">
+                                            {/* 1. STAGING STATE: Files selected but not sending yet */}
+                                            {files.length > 0 && !sending && queueStatus === 'idle' && (
+                                                <div className="flex-1 flex flex-col gap-4 h-full">
+                                                    <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+                                                        <div className="flex justify-between items-center mb-2">
+                                                            <h3 className="font-bold text-lg">Selected Files ({files.length})</h3>
+                                                            <NeoButton size="sm" onClick={() => setFiles([])} className="bg-red-100 text-red-600 border-red-600 h-8 px-2">Clear All</NeoButton>
+                                                        </div>
+                                                        {files.map((file, idx) => (
+                                                            <div key={idx} className="flex justify-between items-center p-3 bg-white border-2 border-neo-black shadow-neo-sm">
+                                                                <div className="flex items-center gap-3 overflow-hidden">
+                                                                    <div className="bg-neo-yellow p-1.5 border-2 border-neo-black">
+                                                                        <File className="w-5 h-5" />
+                                                                    </div>
+                                                                    <div className="flex flex-col truncate">
+                                                                        <span className="font-bold truncate text-sm">{file.name}</span>
+                                                                        <span className="text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                                                                    </div>
+                                                                </div>
+                                                                <button onClick={() => setFiles(prev => prev.filter((_, i) => i !== idx))} className="ml-2 hover:bg-red-100 p-1 rounded-full transition-colors">
+                                                                    <X className="w-4 h-4 text-neo-black" />
+                                                                </button>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                    <p className="font-bold">Sending... {Math.round(progress)}%</p>
+
+                                                    <div className="mt-auto border-t-2 border-neo-black pt-4">
+                                                        <div className="flex gap-3">
+                                                            <NeoButton onClick={() => setFiles([])} className="flex-1 bg-white hover:bg-gray-100">
+                                                                Cancel
+                                                            </NeoButton>
+                                                            <NeoButton onClick={handleStartTransfer} className="flex-[2] bg-neo-green text-white hover:bg-green-600 flex items-center justify-center gap-2">
+                                                                Send {files.length} Files <Send className="w-4 h-4" />
+                                                            </NeoButton>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             )}
 
-                                            {incomingFile && (
-                                                <div className="flex-1 flex flex-col items-center justify-center space-y-4 animate-pulse">
-                                                    <div className="w-full bg-gray-200 h-4 rounded-full overflow-hidden border-2 border-neo-black">
-                                                        <div className="h-full bg-neo-blue transition-all duration-100" style={{ width: `${progress}%` }} />
+                                            {/* 2. SENDING STATE: Batch transfer in progress */}
+                                            {sending && (
+                                                <div className="flex-1 flex flex-col gap-4 h-full">
+                                                    <h3 className="font-bold text-lg mb-2">Sending Files...</h3>
+                                                    <div className="flex-1 overflow-y-auto space-y-3 pr-2">
+                                                        {transferQueue.map((item, idx) => (
+                                                            <div key={idx} className={`p-3 border-2 border-neo-black shadow-neo-sm transition-all ${item.status === 'completed' ? 'bg-green-50 opacity-80' :
+                                                                item.status === 'sending' ? 'bg-white scale-[1.02]' :
+                                                                    'bg-gray-50 opacity-60'
+                                                                }`}>
+                                                                <div className="flex justify-between items-center mb-2">
+                                                                    <span className="font-bold text-sm truncate max-w-[70%]">{item.file.name}</span>
+                                                                    <span className="text-xs font-mono font-bold">
+                                                                        {item.status === 'completed' ? 'DONE' :
+                                                                            item.status === 'sending' ? `${Math.round(progress)}%` :
+                                                                                'WAITING'}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="w-full bg-gray-200 h-3 rounded-full overflow-hidden border border-neo-black">
+                                                                    <div
+                                                                        className={`h-full transition-all duration-200 ${item.status === 'completed' ? 'bg-neo-green' : 'bg-neo-yellow'}`}
+                                                                        style={{
+                                                                            width: item.status === 'completed' ? '100%' :
+                                                                                item.status === 'sending' ? `${progress}%` : '0%'
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        ))}
                                                     </div>
-                                                    <p className="font-bold">Receiving {incomingFile.name}... {Math.round(progress)}%</p>
+                                                    <div className="text-center font-bold text-sm animate-pulse mt-2">
+                                                        Please keep this tab open!
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* 3. COMPLETED STATE: All done */}
+                                            {queueStatus === 'completed' && !sending && (
+                                                <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in zoom-in duration-300">
+                                                    <div className="bg-neo-green p-4 rounded-full border-4 border-neo-black shadow-neo-lg mb-2">
+                                                        <Check className="w-12 h-12 text-white" strokeWidth={4} />
+                                                    </div>
+                                                    <div className="space-y-1">
+                                                        <h2 className="text-3xl font-black uppercase">Start Playing!</h2>
+                                                        <p className="font-bold text-gray-600">All {files.length} files sent successfully.</p>
+                                                    </div>
+                                                    <NeoButton onClick={handleReset} size="lg" className="bg-neo-blue text-white w-full max-w-[200px] shadow-neo-lg">
+                                                        Send More
+                                                    </NeoButton>
+                                                </div>
+                                            )}
+
+                                            {/* 4. DEFAULT EMPTY STATE */}
+                                            {files.length === 0 && !incomingFile && queueStatus === 'idle' && (
+                                                <div className="flex-1 flex flex-col h-full">
+                                                    <FileDropzone onFilesSelected={handleFilesSelected} />
+                                                </div>
+                                            )}
+
+                                            {/* INCOMING FILE STATE (Receiver) */}
+                                            {incomingFile && (
+                                                <div className="flex-1 flex flex-col items-center justify-center space-y-6">
+                                                    <div className="p-6 bg-white border-4 border-neo-black shadow-neo-lg text-center max-w-sm">
+                                                        <div className="animate-spin-slow mb-4 inline-block">
+                                                            <Smartphone className="w-12 h-12 text-neo-blue" />
+                                                        </div>
+                                                        <h3 className="text-xl font-black mb-1 break-all">{incomingFile.name}</h3>
+                                                        <p className="text-sm font-bold text-gray-500 mb-4">
+                                                            {(incomingFile.size / 1024 / 1024).toFixed(2)} MB
+                                                        </p>
+                                                        <div className="w-full bg-gray-200 h-6 rounded-full overflow-hidden border-2 border-neo-black relative">
+                                                            <div className="h-full bg-neo-blue transition-all duration-100" style={{ width: `${progress}%` }} />
+                                                            <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black tracking-widest text-white mix-blend-difference">
+                                                                {Math.round(progress)}%
+                                                            </span>
+                                                        </div>
+                                                        <p className="mt-2 text-xs font-bold animate-pulse">Downloading...</p>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
                                     ) : (
                                         <div className="flex-1 flex flex-col h-full">
+                                            {/* Chat UI remains the same */}
                                             <div className="flex-1 bg-gray-100 border-2 border-neo-black rounded-xl p-4 mb-4 overflow-y-auto max-h-[300px] space-y-2">
                                                 {receivedMessages.length === 0 && (
                                                     <p className="text-gray-400 text-center mt-10">No messages yet</p>
