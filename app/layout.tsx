@@ -19,6 +19,14 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Q.E.D - File Sharing',
   description: 'Quod Erat Demonstrandum. Secure, direct, serverless file transfer.',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Q.E.D.",
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export default function RootLayout({
